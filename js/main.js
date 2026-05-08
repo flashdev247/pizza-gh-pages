@@ -291,8 +291,191 @@
 
 	$('#appointment_time').timepicker();
 
+	var initCart = function() {
+		var CART_KEY = 'pizza_cart_items';
+		var $body = $('body');
+		var cartItems = [];
+
+		var saveCart = function() {
+			try {
+				localStorage.setItem(CART_KEY, JSON.stringify(cartItems));
+			} catch (e) {}
+		};
+
+		var loadCart = function() {
+			try {
+				var stored = localStorage.getItem(CART_KEY);
+				if (!stored) {
+					return [];
+				}
+				var parsed = JSON.parse(stored);
+				return Array.isArray(parsed) ? parsed : [];
+			} catch (e) {
+				return [];
+			}
+		};
+
+		var formatPrice = function(price) {
+			return '$' + Number(price || 0).toFixed(2);
+		};
+
+		var getCartCount = function() {
+			return cartItems.reduce(function(total, item) {
+				return total + item.quantity;
+			}, 0);
+		};
+
+		var getCartTotal = function() {
+			return cartItems.reduce(function(total, item) {
+				return total + (item.price * item.quantity);
+			}, 0);
+		};
+
+		var createCartUI = function() {
+			var cartHTML = '' +
+				'<button type="button" class="cart-float-btn" aria-label="Mở giỏ hàng">🛒 <span class="cart-count-badge">0</span></button>' +
+				'<div class="cart-overlay"></div>' +
+				'<aside class="cart-panel" aria-hidden="true">' +
+					'<div class="cart-panel-header">' +
+						'<h4>Giỏ hàng</h4>' +
+						'<button type="button" class="cart-close-btn" aria-label="Đóng giỏ hàng">&times;</button>' +
+					'</div>' +
+					'<div class="cart-items"></div>' +
+					'<div class="cart-empty">Chưa có sản phẩm trong giỏ hàng.</div>' +
+					'<div class="cart-summary">' +
+						'<p><strong>Tổng cộng:</strong> <span class="cart-total">$0.00</span></p>' +
+					'</div>' +
+					'<button type="button" class="btn btn-primary cart-checkout-btn">Thanh toán</button>' +
+					'<div class="payment-methods">' +
+						'<p>Chọn phương thức thanh toán:</p>' +
+						'<button type="button" class="btn btn-outline-light payment-method-option" data-method="Tiền mặt">Tiền mặt</button>' +
+						'<button type="button" class="btn btn-outline-light payment-method-option" data-method="Thẻ ngân hàng">Thẻ ngân hàng</button>' +
+						'<button type="button" class="btn btn-outline-light payment-method-option" data-method="Ví điện tử">Ví điện tử</button>' +
+					'</div>' +
+					'<p class="checkout-success"></p>' +
+				'</aside>';
+
+			$body.append(cartHTML);
+		};
+
+		var renderCart = function() {
+			var $cartItems = $('.cart-items');
+			var $cartEmpty = $('.cart-empty');
+			var $cartTotal = $('.cart-total');
+			var $countBadge = $('.cart-count-badge');
+			var $checkoutBtn = $('.cart-checkout-btn');
+
+			$cartItems.empty();
+
+			cartItems.forEach(function(item) {
+				var $row = $('<div class="cart-item-row"></div>');
+				var $info = $('<div class="cart-item-info"></div>');
+				var $name = $('<p class="cart-item-name"></p>').text(item.name);
+				var $meta = $('<small class="cart-item-meta"></small>').text(item.quantity + ' x ' + formatPrice(item.price));
+				var $remove = $('<button type="button" class="cart-remove-btn">Xóa</button>');
+				$remove.attr('data-id', item.id);
+
+				$info.append($name).append($meta);
+				$row.append($info).append($remove);
+				$cartItems.append($row);
+			});
+
+			$countBadge.text(getCartCount());
+			$cartTotal.text(formatPrice(getCartTotal()));
+
+			var hasItems = cartItems.length > 0;
+			$cartEmpty.toggle(!hasItems);
+			$checkoutBtn.prop('disabled', !hasItems);
+		};
+
+		var openCart = function() {
+			$('.cart-overlay').addClass('show');
+			$('.cart-panel').addClass('show').attr('aria-hidden', 'false');
+		};
+
+		var closeCart = function() {
+			$('.cart-overlay').removeClass('show');
+			$('.cart-panel').removeClass('show').attr('aria-hidden', 'true');
+		};
+
+		var addToCart = function(product) {
+			var existing = cartItems.find(function(item) {
+				return item.id === product.id;
+			});
+
+			if (existing) {
+				existing.quantity += 1;
+			} else {
+				cartItems.push(product);
+			}
+
+			saveCart();
+			renderCart();
+		};
+
+		var extractProduct = function($button) {
+			var $menuWrap = $button.closest('.menu-wrap');
+			var $serviceWrap = $button.closest('.services-wrap');
+			var $context = $menuWrap.length ? $menuWrap : $serviceWrap;
+			var name = $.trim($context.find('.text h3').first().text()) || 'Sản phẩm';
+			var priceText = $.trim($context.find('.price span').first().text()) || '$0';
+			var price = parseFloat(priceText.replace(/[^0-9.]/g, '')) || 0;
+			var id = name + '_' + price.toFixed(2);
+
+			return {
+				id: id,
+				name: name,
+				price: price,
+				quantity: 1
+			};
+		};
+
+		createCartUI();
+		cartItems = loadCart();
+		renderCart();
+
+		$body.on('click', '.cart-float-btn', function() {
+			openCart();
+		});
+
+		$body.on('click', '.cart-close-btn, .cart-overlay', function() {
+			closeCart();
+		});
+
+		$body.on('click', '.cart-remove-btn', function() {
+			var id = $(this).attr('data-id');
+			cartItems = cartItems.filter(function(item) {
+				return item.id !== id;
+			});
+			saveCart();
+			renderCart();
+		});
+
+		$body.on('click', '.cart-checkout-btn', function() {
+			if (!cartItems.length) {
+				return;
+			}
+			$('.checkout-success').text('');
+			$('.payment-methods').addClass('show');
+		});
+
+		$body.on('click', '.payment-method-option', function() {
+			var method = $(this).data('method');
+			cartItems = [];
+			saveCart();
+			renderCart();
+			$('.payment-methods').removeClass('show');
+			$('.checkout-success').text('Đặt hàng thành công bằng ' + method + '!');
+		});
+
+		$body.on('click', '.menu-wrap .btn.btn-white.btn-outline-white, .services-wrap .btn.btn-white.btn-outline-white', function(e) {
+			e.preventDefault();
+			var product = extractProduct($(this));
+			addToCart(product);
+		});
+	};
+	initCart();
 
 
 
 })(jQuery);
-
