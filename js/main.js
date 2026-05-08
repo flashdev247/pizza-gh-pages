@@ -315,9 +315,12 @@
 			}
 		};
 
-		var formatPrice = function(price) {
-			return '$' + Number(price || 0).toFixed(2);
-		};
+			var formatPrice = function(price) {
+				// format as Vietnamese đồng with dot thousands separator
+				var n = Number(price || 0);
+				var intVal = Math.round(n);
+				return intVal.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ' VNĐ';
+			};
 
 		var getCartCount = function() {
 			return cartItems.reduce(function(total, item) {
@@ -343,7 +346,7 @@
 					'<div class="cart-items"></div>' +
 					'<div class="cart-empty">Chưa có sản phẩm trong giỏ hàng.</div>' +
 					'<div class="cart-summary">' +
-						'<p><strong>Tổng cộng:</strong> <span class="cart-total">$0.00</span></p>' +
+						'<p><strong>Tổng cộng:</strong> <span class="cart-total">0 VNĐ</span></p>' +
 					'</div>' +
 					'<button type="button" class="btn btn-primary cart-checkout-btn">Thanh toán</button>' +
 					'<div class="payment-methods">' +
@@ -418,9 +421,17 @@
 			var $serviceWrap = $button.closest('.services-wrap');
 			var $context = $menuWrap.length ? $menuWrap : $serviceWrap;
 			var name = $.trim($context.find('.text h3').first().text()) || 'Sản phẩm';
-			var priceText = $.trim($context.find('.price span').first().text()) || '$0';
-			var price = parseFloat(priceText.replace(/[^0-9.]/g, '')) || 0;
-			var id = name + '_' + price.toFixed(2);
+				var priceText = $.trim($context.find('.price span').first().text()) || '0 VNĐ';
+				var price = 0;
+				// If price is in VNĐ (e.g. "72.500 VNĐ"), remove non-digits and parse as integer
+				if (/VNĐ|VND/i.test(priceText)) {
+					var digits = priceText.replace(/[^0-9]/g, '');
+					price = parseInt(digits, 10) || 0;
+				} else {
+					// fallback: parse as float (USD-like values)
+					price = parseFloat(priceText.replace(/[^0-9.]/g, '')) || 0;
+				}
+				var id = name + '_' + price;
 
 			return {
 				id: id,
