@@ -72,72 +72,15 @@
           <div class="col-md-7 heading-section ftco-animate text-center">
             <h2 class="mb-4">Thực đơn của chúng tôi</h2>
             <p>Chúng tôi tập trung vào chất lượng món ăn, tốc độ phục vụ và trải nghiệm thân thiện cho khách hàng Việt Nam.</p>
+            <div class="form-group mt-4">
+              <input type="text" id="food-search" class="form-control text-center" placeholder="Nhập tên món ăn để tìm kiếm..." style="border-radius: 30px; padding: 10px 20px; color: white !important;">
+            </div>
           </div>
         </div>
     	</div>
     	<div class="container-wrap">
-    		<div class="row no-gutters d-flex">
-    			<div class="col-lg-4 d-flex ftco-animate">
-    				<div class="services-wrap d-flex">
-    					<a href="#" class="img" style="background-image: url(images/pizza-1.jpg);"></a>
-    					<div class="text p-4">
-    						<h3>Pizza Ý</h3>
-    						<p>Chúng tôi tập trung vào chất lượng món ăn, tốc độ phục vụ và trải nghiệm thân thiện cho khách hàng Việt Nam. </p>
-    						<p class="price"><span>72.500 VNĐ</span> <a href="#" class="ml-2 btn btn-white btn-outline-white">Đặt món</a></p>
-    					</div>
-    				</div>
-    			</div>
-    			<div class="col-lg-4 d-flex ftco-animate">
-    				<div class="services-wrap d-flex">
-    					<a href="#" class="img" style="background-image: url(images/pizza-2.jpg);"></a>
-    					<div class="text p-4">
-    						<h3>Pizza Hy Lạp</h3>
-    						<p>Chúng tôi tập trung vào chất lượng món ăn, tốc độ phục vụ và trải nghiệm thân thiện cho khách hàng Việt Nam.</p>
-    						<p class="price"><span>72.500 VNĐ</span> <a href="#" class="ml-2 btn btn-white btn-outline-white">Đặt món</a></p>
-    					</div>
-    				</div>
-    			</div>
-    			<div class="col-lg-4 d-flex ftco-animate">
-    				<div class="services-wrap d-flex">
-    					<a href="#" class="img" style="background-image: url(images/pizza-3.jpg);"></a>
-    					<div class="text p-4">
-    						<h3>Pizza kiểu Caucasus</h3>
-    						<p>Chúng tôi tập trung vào chất lượng món ăn, tốc độ phục vụ và trải nghiệm thân thiện cho khách hàng Việt Nam.</p>
-    						<p class="price"><span>72.500 VNĐ</span> <a href="#" class="ml-2 btn btn-white btn-outline-white">Đặt món</a></p>
-    					</div>
-    				</div>
-    			</div>
-
-    			<div class="col-lg-4 d-flex ftco-animate">
-    				<div class="services-wrap d-flex">
-    					<a href="#" class="img order-lg-last" style="background-image: url(images/pizza-4.jpg);"></a>
-    					<div class="text p-4">
-    						<h3>Pizza Mỹ</h3>
-    						<p>Chúng tôi tập trung vào chất lượng món ăn, tốc độ phục vụ và trải nghiệm thân thiện cho khách hàng Việt Nam. </p>
-    						<p class="price"><span>72.500 VNĐ</span> <a href="#" class="ml-2 btn btn-white btn-outline-white">Đặt món</a></p>
-    					</div>
-    				</div>
-    			</div>
-    			<div class="col-lg-4 d-flex ftco-animate">
-    				<div class="services-wrap d-flex">
-    					<a href="#" class="img order-lg-last" style="background-image: url(images/pizza-5.jpg);"></a>
-    					<div class="text p-4">
-    						<h3>Bánh cà chua</h3>
-    						<p>Chúng tôi tập trung vào chất lượng món ăn, tốc độ phục vụ và trải nghiệm thân thiện cho khách hàng Việt Nam.</p>
-    						<p class="price"><span>72.500 VNĐ</span> <a href="#" class="ml-2 btn btn-white btn-outline-white">Đặt món</a></p>
-    					</div>
-    				</div>
-    			</div>
-    			<div class="col-lg-4 d-flex ftco-animate">
-    				<div class="services-wrap d-flex">
-    					<a href="#" class="img order-lg-last" style="background-image: url(images/pizza-6.jpg);"></a>
-    					<div class="text p-4">
-    						<h3>Margherita</h3>
-    						<p>Chúng tôi tập trung vào chất lượng món ăn, tốc độ phục vụ và trải nghiệm thân thiện cho khách hàng Việt Nam.</p>
-    						<p class="price"><span>72.500 VNĐ</span> <a href="#" class="ml-2 btn btn-white btn-outline-white">Đặt món</a></p>
-    					</div>
-    				</div>
-    			</div>
+    		<div class="row no-gutters d-flex" id="dynamic-menu-container">
+    			<!-- Dữ liệu món ăn sẽ được render ở đây bằng JavaScript -->
     		</div>
     	</div>
 
@@ -535,7 +478,59 @@
   <script src="js/scrollax.min.js"></script>
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVWaKrjvy3MaE7SQ74_uJiULgl1JY0H2s&sensor=false"></script>
   <script src="js/google-map.js"></script>
+  <script src="js/data.js"></script>
   <script src="js/main.js"></script>
+  
+  <script>
+    $(document).ready(function(){
+      // Hàm render danh sách món ăn từ data
+      function renderMenu(data) {
+        const container = $("#dynamic-menu-container");
+        container.empty(); // Xóa nội dung cũ
+        
+        if (data.length === 0) {
+          container.append('<div class="col-12 text-center p-5"><h4>Không tìm thấy món ăn nào phù hợp!</h4></div>');
+          return;
+        }
+
+        data.forEach((item, index) => {
+          // Xen kẽ class 'order-lg-last' cho các hàng dưới giống thiết kế cũ (mỗi 3 cột 1 hàng)
+          const orderClass = index >= 3 ? "order-lg-last" : "";
+          
+          const html = `
+            <div class="col-lg-4 d-flex ftco-animate fadeInUp ftco-animated">
+              <div class="services-wrap d-flex">
+                <a href="#" class="img ${orderClass}" style="background-image: url(${item.image});"></a>
+                <div class="text p-4">
+                  <h3>${item.name}</h3>
+                  <p>${item.description}</p>
+                  <p class="price"><span>${item.price}</span> <a href="#" class="ml-2 btn btn-white btn-outline-white">Đặt món</a></p>
+                </div>
+              </div>
+            </div>
+          `;
+          container.append(html);
+        });
+      }
+
+      // Render toàn bộ pizza lần đầu (hoặc render tất cả, tuỳ ý. Ở đây render toàn bộ để tìm kiếm cho dễ)
+      renderMenu(menuData);
+
+      // Sự kiện tìm kiếm
+      $("#food-search").on("keyup", function() {
+        var value = $(this).val().toLowerCase();
+        
+        // Lọc trực tiếp trên biến menuData
+        var filteredData = menuData.filter(function(item) {
+          return item.name.toLowerCase().includes(value) || 
+                 item.description.toLowerCase().includes(value);
+        });
+
+        // Vẽ lại giao diện với mảng đã lọc
+        renderMenu(filteredData);
+      });
+    });
+  </script>
     
   </body>
 </html>
