@@ -72,8 +72,35 @@
           <div class="col-md-7 heading-section ftco-animate text-center">
             <h2 class="mb-4">Thực đơn của chúng tôi</h2>
             <p>Chúng tôi tập trung vào chất lượng món ăn, tốc độ phục vụ và trải nghiệm thân thiện cho khách hàng Việt Nam.</p>
-            <div class="form-group mt-4">
-              <input type="text" id="food-search" class="form-control text-center" placeholder="Nhập tên món ăn để tìm kiếm..." style="border-radius: 30px; padding: 10px 20px; color: white !important;">
+            <style>
+              .search-container {
+                position: relative;
+                max-width: 600px;
+                margin: 0 auto;
+              }
+              #food-search {
+                border-radius: 50px;
+                padding: 18px 30px;
+                color: #fff !important;
+                background: rgba(255, 255, 255, 0.05);
+                border: 2px solid #fac564;
+                font-size: 18px;
+                box-shadow: 0 0 20px rgba(250, 197, 100, 0.2);
+                transition: all 0.3s ease;
+                width: 100%;
+              }
+              #food-search:focus {
+                background: rgba(255, 255, 255, 0.15);
+                box-shadow: 0 0 30px rgba(250, 197, 100, 0.6);
+                outline: none;
+                border-color: #fac564;
+              }
+              #food-search::placeholder {
+                color: rgba(255, 255, 255, 0.6);
+              }
+            </style>
+            <div class="form-group mt-5 mb-5 search-container">
+              <input type="text" id="food-search" class="form-control text-center" placeholder="🔍 Tìm món ăn bạn yêu thích...">
             </div>
           </div>
         </div>
